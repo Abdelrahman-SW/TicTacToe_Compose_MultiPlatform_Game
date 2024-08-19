@@ -1,5 +1,12 @@
 package com.beapps.tictactoe_game
 
 import androidx.compose.ui.window.ComposeUIViewController
+import com.beapps.tictactoe_game.di.initKoin
 
-fun MainViewController() = ComposeUIViewController { App() }
+fun MainViewController() = ComposeUIViewController(
+    configure = {
+        initKoin()
+    }
+) {
+    App()
+}
