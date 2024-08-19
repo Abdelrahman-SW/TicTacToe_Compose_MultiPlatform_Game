@@ -16,6 +16,9 @@ class TicTacToeViewModel(
     private val ticTacToeClient: RealtimeTicTacToeMessagingClient
 ) : ViewModel() {
 
+    var usernameTextFieldState by mutableStateOf("")
+        private set
+
     var isLoading by mutableStateOf(false)
         private set
 
@@ -25,11 +28,15 @@ class TicTacToeViewModel(
     private val _uiEvents = MutableSharedFlow<UIEvents>()
     val uiEvents = _uiEvents.asSharedFlow()
 
+    fun onUsernameChange(username: String) {
+        usernameTextFieldState = username
+    }
 
-    fun connectToGame(username: String) {
+
+    fun connectToGame() {
         viewModelScope.launch {
             isLoading = true
-            val isConnected = ticTacToeClient.connectToWebSocket(username)
+            val isConnected = ticTacToeClient.connectToWebSocket(usernameTextFieldState)
             isLoading = false
             if (isConnected) {
                 _uiEvents.emit(UIEvents.GoToGameScreen)
