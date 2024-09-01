@@ -14,6 +14,7 @@
 <h2 align="left">About :</h2>
 This Tic-Tac-Toe game is a cross-platform application built using Kotlin Compose Multiplatform, offering a seamless gaming experience on multiple devices. The game features real-time multiplayer functionality, allowing two players to connect and play against each other, regardless of their platform.
 <br></br>
+The backend of the game is built using Ktor. You can explore the backend repository 🔗 : https://github.com/Abdelrahman-SW/TicTacToe_Ktor_WebSocket_Backend
 
 <h2 align="left">Tools & Technloges Used in The App : </h2>
 
@@ -58,9 +59,9 @@ This Tic-Tac-Toe game is a cross-platform application built using Kotlin Compose
 ➡️ Hint: The Screenshots Above shows a preview of the app running on desktop and Android. While the app also supports iOS, I am unable to run it on an IOS simulator due to using a Windows machine.
 
 <h2 align="left">Conclusion</h2>
-Simple Real-Time Multiplayer 𝑇𝑖𝑐𝑇𝑎𝑐𝑇𝑜𝑒 Game , I intend to extend the game later by adding creating rooms feature and more ... 🤩
+This is a simple real-time multiplayer Tic-Tac-Toe game. Future plans include adding a room creation feature and other enhancements. 🤩
 
 <br></br>
--- This App Was Developed At September 2024 📅
+-- Developed in September 2024 📅
 <br></br>
 
