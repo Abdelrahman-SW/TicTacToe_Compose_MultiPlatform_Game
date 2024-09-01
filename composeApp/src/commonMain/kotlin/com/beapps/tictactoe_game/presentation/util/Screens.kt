@@ -10,4 +10,4 @@ data object HomeScreen
 
 
 @Serializable
-data class GameScreen (val username : String)
+data object GameScreen

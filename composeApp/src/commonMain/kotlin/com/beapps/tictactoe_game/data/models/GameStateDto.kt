@@ -10,7 +10,8 @@ data class GameStateDto(
     val board: Array<Array<Char?>> = emptyBoard(),
     val winingPlayer: Player? = null,
     val isBoardFull: Boolean = false,
-    val connectedPlayers: List<Player> = emptyList()
+    val connectedPlayers: List<Player> = emptyList(),
+    val countdown : Int = 0
 ) {
     companion object {
         fun emptyBoard(): Array<Array<Char?>> {
@@ -26,13 +27,14 @@ data class GameStateDto(
         if (this === other) return true
         if (other == null || this::class != other::class) return false
 
-        other as GameStateDto
+        other as GameState
 
         if (playerAtTurn != other.playerAtTurn) return false
         if (!board.contentDeepEquals(other.board)) return false
         if (winingPlayer != other.winingPlayer) return false
         if (isBoardFull != other.isBoardFull) return false
         if (connectedPlayers != other.connectedPlayers) return false
+        if (countdown != other.countdown) return false
 
         return true
     }
@@ -43,6 +45,7 @@ data class GameStateDto(
         result = 31 * result + (winingPlayer?.hashCode() ?: 0)
         result = 31 * result + isBoardFull.hashCode()
         result = 31 * result + connectedPlayers.hashCode()
+        result = 31 * result + countdown
         return result
     }
 
@@ -52,7 +55,8 @@ data class GameStateDto(
             board = board,
             winingPlayer = winingPlayer,
             isBoardFull = isBoardFull,
-            connectedPlayers = connectedPlayers
+            connectedPlayers = connectedPlayers,
+            countdown = countdown
         )
     }
 }

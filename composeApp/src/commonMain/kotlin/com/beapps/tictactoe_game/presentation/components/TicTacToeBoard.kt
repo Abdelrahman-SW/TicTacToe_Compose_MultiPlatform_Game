@@ -169,8 +169,3 @@ private fun DrawScope.drawBoardLines(color: Color , strokeWidth : Dp) {
         cap = StrokeCap.Round
     )
 }
-
-
-fun DpSize.toSize(): Size {
-    return Size(width.value, height.value)
-}

@@ -11,6 +11,7 @@ import io.ktor.websocket.Frame
 import io.ktor.websocket.WebSocketSession
 import io.ktor.websocket.close
 import io.ktor.websocket.readText
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flow
@@ -24,7 +25,16 @@ class RealtimeTicTacToeMessagingClientKtorImpl(
     private val client: HttpClient
 ) : RealtimeTicTacToeMessagingClient {
 
+
+
     private var socketSession: WebSocketSession? = null
+    override suspend fun getSessionIsActiveState(): Flow<Boolean> = flow {
+        while (socketSession!=null) {
+            val isSessionActive = socketSession?.isActive == true
+            emit(isSessionActive)
+            delay(1000) // Check every second, adjust this as needed
+        }
+    }
 
     override suspend fun connectToWebSocket(username: String): Boolean {
         return try {
@@ -47,8 +57,9 @@ class RealtimeTicTacToeMessagingClientKtorImpl(
                     .map { Json.decodeFromString<GameStateDto>(it.readText()).toGameState() }
             } ?: flow { }
         } catch (e: Exception) {
+            println("Error in getGameStateStream : ${e.message}")
             e.printStackTrace()
-            flow { }
+            flow { emit(GameState()) }
         }
     }
 
@@ -61,7 +72,10 @@ class RealtimeTicTacToeMessagingClientKtorImpl(
     }
 
     override suspend fun disconnect() {
+        println("Disconnecting")
         socketSession?.close()
         socketSession = null
+        println("Disconnected")
+
     }
 }

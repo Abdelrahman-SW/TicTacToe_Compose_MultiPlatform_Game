@@ -8,11 +8,15 @@ import androidx.lifecycle.viewModelScope
 import com.beapps.tictactoe_game.domain.RealtimeTicTacToeMessagingClient
 import com.beapps.tictactoe_game.domain.models.GameState
 import com.beapps.tictactoe_game.domain.models.PlayerTurn
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 
-class TicTacToeViewModel(
+class TicTacToeSharedViewModel(
     private val ticTacToeClient: RealtimeTicTacToeMessagingClient
 ) : ViewModel() {
 
@@ -34,6 +38,13 @@ class TicTacToeViewModel(
 
 
     fun connectToGame() {
+        if (usernameTextFieldState.isBlank()) {
+            viewModelScope.launch {
+                _uiEvents.emit(UIEvents.ShowErrorMessage("Username can't be empty"))
+                return@launch
+            }
+            return
+        }
         viewModelScope.launch {
             isLoading = true
             val isConnected = ticTacToeClient.connectToWebSocket(usernameTextFieldState)
@@ -43,6 +54,12 @@ class TicTacToeViewModel(
                 ticTacToeClient.getGameStateStream().collect { state ->
                     gameState = state
                 }
+                ticTacToeClient.getSessionIsActiveState().collect { isActive ->
+                    if (!isActive) {
+                         disconnectAnyActiveSession()
+                        _uiEvents.emit(UIEvents.ExitGame)
+                    }
+                }
             }
             else {
                 // show error
@@ -51,24 +68,29 @@ class TicTacToeViewModel(
         }
     }
 
+    fun disconnectAnyActiveSession(dispatcher: CoroutineContext = Dispatchers.IO) {
+        viewModelScope.launch(dispatcher) {
+            ticTacToeClient.disconnect()
+        }
+    }
+
     fun onMakeTurn(x: Int, y: Int) {
         viewModelScope.launch {
             // do some validation :
-            if (gameState.board[y][x] != null || gameState.winingPlayer != null) return@launch
+            if (gameState.board[y][x] != null || gameState.winingPlayer != null || gameState.playerAtTurn != gameState.connectedPlayers.find { it.username == usernameTextFieldState }) return@launch
             ticTacToeClient.sendPlayerTurn(PlayerTurn(x, y))
         }
     }
 
     override fun onCleared() {
         super.onCleared()
-        viewModelScope.launch {
-            ticTacToeClient.disconnect()
-        }
+        disconnectAnyActiveSession(NonCancellable)
     }
 
     sealed class UIEvents {
         data class ShowErrorMessage(val message: String) : UIEvents()
         data object GoToGameScreen : UIEvents()
+        data object ExitGame : UIEvents()
     }
 }
 
