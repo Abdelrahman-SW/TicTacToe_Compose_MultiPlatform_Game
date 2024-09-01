@@ -10,10 +10,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,6 +40,7 @@ import com.beapps.tictactoe_game.presentation.util.darkGray
 import com.beapps.tictactoe_game.presentation.util.lightBlue100
 import com.beapps.tictactoe_game.presentation.util.mainComponentColor
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @Composable
 fun GameScreen(
@@ -41,7 +50,7 @@ fun GameScreen(
 ) {
     val username = viewModel.usernameTextFieldState
     val gameState = viewModel.gameState
-
+    val scope = rememberCoroutineScope()
     LaunchedEffect(true) {
         viewModel.uiEvents.collectLatest { event ->
             when (event) {
@@ -65,18 +74,32 @@ fun GameScreen(
         val maxHeight = constraints.maxHeight
 
         val boardWidth = with(LocalDensity.current) {
-            (maxWidth.toFloat()/1.3f).toDp()
+            (maxWidth.toFloat() / 1.3f).toDp()
+        }
+        val boardHeight = with(LocalDensity.current) {
+            (maxHeight.toFloat() / 1.3f).toDp()
         }
 
+        val scrollState = rememberScrollState()
 
-        Column (modifier = Modifier.fillMaxSize() , horizontalAlignment = Alignment.CenterHorizontally , verticalArrangement = Arrangement.Center) {
+        Column(
+            modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
 
             if (gameState.connectedPlayers.size == 2) {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     text = buildAnnotatedString {
                         append(gameState.connectedPlayers[0].username)
-                        pushStyle(SpanStyle(color = lightBlue100 , fontSize = 24.sp  , fontFamily = GetChangoFontFamily()))
+                        pushStyle(
+                            SpanStyle(
+                                color = lightBlue100,
+                                fontSize = 24.sp,
+                                fontFamily = GetChangoFontFamily()
+                            )
+                        )
                         append(" V.s ")
                         pop()
                         append(gameState.connectedPlayers[1].username)
@@ -108,8 +131,10 @@ fun GameScreen(
                 modifier = Modifier.fillMaxWidth(),
                 text = buildAnnotatedString {
                     append("You Are The: ")
-                    val char = gameState.connectedPlayers.find { it.username == username }?.type?.char ?: ""
-                    pushStyle(SpanStyle(color = if ( char == 'X') Color.White else lightBlue100))
+                    val char =
+                        gameState.connectedPlayers.find { it.username == username }?.type?.char
+                            ?: ""
+                    pushStyle(SpanStyle(color = if (char == 'X') Color.White else lightBlue100))
                     append(char.toString() ?: "")
                 },
                 textAlign = TextAlign.Center,
@@ -121,10 +146,11 @@ fun GameScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            val stateTxt = if (gameState.connectedPlayers.size < 2) "Waiting for the Second player . . ."
-            else if (gameState.winingPlayer != null) "${gameState.winingPlayer.username} is Won !"
-            else if (gameState.isBoardFull) "Game is Draw"
-            else "It's ${gameState.playerAtTurn?.username ?: "Guest"}'s turn"
+            val stateTxt =
+                if (gameState.connectedPlayers.size < 2) "Waiting for the Second player . . ."
+                else if (gameState.winingPlayer != null) "${gameState.winingPlayer.username} is Won !"
+                else if (gameState.isBoardFull) "Game is Draw"
+                else "It's ${gameState.playerAtTurn?.username ?: "Guest"}'s turn"
 
             Text(
                 modifier = Modifier.fillMaxWidth(),
@@ -155,6 +181,7 @@ fun GameScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             if (gameState.countdown != 0) {
+                scope.launch { scrollState.scrollTo(scrollState.maxValue) }
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     text = "The New Round Will Be Started At ${gameState.countdown} Seconds . . .",
@@ -163,6 +190,14 @@ fun GameScreen(
                     fontFamily = GetChangoFontFamily()
                 )
             }
+        }
+
+        IconButton(onClick = { navController.navigateUp() }, modifier = Modifier.align(
+            Alignment.TopStart
+        ).size(32.dp)) {
+            Icon(
+                Icons.Default.ArrowBack, "Back", tint = Color.White
+            )
         }
     }
 }

@@ -12,7 +12,8 @@ interface RealtimeTicTacToeMessagingClient {
     suspend fun disconnect()
 
     companion object {
-        const val BASE_URL = "ws://192.168.1.5:8080/"
+        // 172.23.64.1 : is my device ip address replace it with your own ip
+        const val BASE_URL = "ws://172.23.64.1:8080/"
         const val TicTacToe_SOCKET_ENDPOINT = "play"
     }
 }
